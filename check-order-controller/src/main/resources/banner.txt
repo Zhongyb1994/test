@@ -1,0 +1,13 @@
+${AnsiColor.BRIGHT_RED}
+-----------------------------------------
+ _____ ____  _   _  _____        ______
+|  ___/ ___|| | | |/ _ \ \      / / ___|
+| |_  \___ \| |_| | | | \ \ /\ / /\___ \
+|  _|  ___) |  _  | |_| |\ V  V /  ___) |
+|_|   |____/|_| |_|\___/  \_/\_/  |____/
+
+----------------------------------------
+${AnsiColor.BLUE}
+Spring Boot Version: ${spring-boot.version}${spring-boot.formatted-version}
+sxpay-admin Application Env: ${spring.profiles.active}
+Root Log Level: ${logging.level.root}

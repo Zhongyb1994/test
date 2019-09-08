@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="300">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout>
+                <pattern>[%-5p][%d{yyyy-MM-dd HH:mm:ss,SSS}][%C{1}:%L] %m%n</pattern>
+            </PatternLayout>
+        </Console>
+        <RollingFile name="RollingFile"
+                     fileName="${sys:user.home}/logs/check-order-system/check-order-system.log"
+                     filePattern="${sys:user.home}/logs/check-order-system/check-order-system.%d{yyyyMMdd}.log"
+                     append="true">
+            <PatternLayout>
+                <pattern>[%-5p][%d{yyyy-MM-dd HH:mm:ss,SSS}][%C{1}:%L] %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="ErrorRollingFile"
+                     fileName="${sys:user.home}/logs/check-order-system/check-order-system-error.log"
+                     filePattern="${sys:user.home}/logs/check-order-system/check-order-system-error.%d{yyyyMMdd}.log"
+                     append="true">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <pattern>[%-5p][%d{yyyy-MM-dd HH:mm:ss,SSS}][%C{1}:%L] %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <!-- 消费日志 -->
+        <RollingFile name="ServiceDigest"
+                     fileName="${sys:user.home}/logs/check-order-system/check-order-system-digest.log"
+                     filePattern="${sys:user.home}/logs/check-order-system/check-order-system-digest.%d{yyyyMMdd}.log"
+                     append="true">
+            <PatternLayout>
+                <pattern>[%-5p][%d{yyyy-MM-dd HH:mm:ss,SSS}][%C{1}:%L] %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="ServiceDefault"
+                     fileName="${sys:user.home}/logs/check-order-system/check-order-system-default.log"
+                     filePattern="${sys:user.home}/logs/check-order-system/check-order-system-default.%d{yyyyMMdd}.log"
+                     append="true">
+            <PatternLayout>
+                <pattern>[%-5p][%d{yyyy-MM-dd HH:mm:ss,SSS}][%C{1}:%L] %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+
+
+    </Appenders>
+    <Loggers>
+        <!-- SQL调试日志在本地调试可以打开，但是不能提交到服务器-->
+        <!--<logger name="druid.sql.Statement" level="debug" additivity="false">-->
+        <!--<appender-ref ref="Console"/>-->
+        <!--</logger>-->
+        <!--<logger name="druid.sql.ResultSet" level="debug" additivity="false">-->
+        <!--<appender-ref ref="Console"/>-->
+        <!--</logger>-->
+        <logger name="RocketmqClient" level="error" additivity="fasle">
+            <appender-ref ref="Console"/>
+        </logger>
+        <logger name="RocketmqStore" level="error" additivity="fasle">
+            <appender-ref ref="Console"/>
+        </logger>
+        <logger name="SERVICE-DIGEST" level="info" additivity="fasle">
+            <appender-ref ref="ServiceDigest"/>
+        </logger>
+
+        <logger name="SERVICE-DEFAULT" level="info" additivity="fasle">
+            <appender-ref ref="ServiceDefault"/>
+        </logger>
+
+        <AsyncRoot level="INFO" includeLocation="true" additivity="false">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="ErrorRollingFile"/>
+        </AsyncRoot>
+    </Loggers>
+</Configuration>
