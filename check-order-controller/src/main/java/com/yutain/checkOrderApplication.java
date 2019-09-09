@@ -17,6 +17,7 @@ import org.springframework.context.annotation.ComponentScans;
         DataSourceTransactionManagerAutoConfiguration.class})
 @ComponentScans({
         @ComponentScan("com.yutian.common"),
+        @ComponentScan("com.yutian"),
         @ComponentScan("com.yutian.service")
 })
 public class checkOrderApplication {
