@@ -17,8 +17,8 @@ import org.springframework.context.annotation.ComponentScans;
         DataSourceTransactionManagerAutoConfiguration.class})
 @ComponentScans({
         @ComponentScan("com.yutian.common"),
-        @ComponentScan("com.yutian"),
-        @ComponentScan("com.yutian.service")
+        @ComponentScan("com.yutian.controller"),
+        @ComponentScan("com.yutian.common")
 })
 public class checkOrderApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(checkOrderApplication.class);
