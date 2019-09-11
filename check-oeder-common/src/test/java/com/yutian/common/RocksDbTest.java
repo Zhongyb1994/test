@@ -4,8 +4,12 @@
  */
 package com.yutian.common;
 
+import com.google.common.collect.Sets;
 import com.yutian.common.util.RocksDbUtils;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -16,7 +20,14 @@ public class RocksDbTest {
 
     @Test
     public void  test(){
-        RocksDbUtils instance = RocksDbUtils.getInstance();
+        RocksDbUtils db = RocksDbUtils.getInstance();
+        HashSet<String> set = Sets.newHashSet();
+        set.add("rose");
+        set.add("jack");
+        db.put("name",set);
+
+        Set<String> set1 = db.get("name");
+        System.out.println(set1);
 
     }
 }

@@ -282,5 +282,10 @@
             <artifactId>rocksdbjni</artifactId>
             <version>5.9.2</version>
         </dependency>
+        <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+            <version>2.52</version>
+        </dependency>
     </dependencies>
 </project>

@@ -8,6 +8,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
+import java.util.Set;
+
 /**
  *
  * @author wangyz
@@ -41,6 +43,32 @@ public class RocksDbUtils {
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
+    }
+
+    public void close(){
+        rocksDB.close();
+    }
+
+    public void  put(String key, Set<String> stringSet) {
+        byte[] keyB = SerializerUtil.serialize(key);
+        byte[] value = SerializerUtil.serialize(stringSet);
+        try {
+            rocksDB.put(keyB,value);
+        } catch (RocksDBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Set<String> get(String key){
+        byte[] keyb = SerializerUtil.serialize(key);
+        Set<String> set = null;
+        try {
+            byte[] bytes = rocksDB.get(keyb);
+            set = SerializerUtil.deserialize(bytes);
+        } catch (RocksDBException e) {
+            e.printStackTrace();
+        }
+        return set;
     }
 
 }
