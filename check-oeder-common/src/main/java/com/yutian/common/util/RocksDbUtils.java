@@ -28,6 +28,10 @@ public class RocksDbUtils {
         openDb();
     }
 
+    /**
+     * 实力化工具类
+     * @return
+     */
     public static RocksDbUtils getInstance(){
         if (instance == null){
             synchronized (RocksDbUtils.class){
@@ -37,6 +41,9 @@ public class RocksDbUtils {
         return instance;
     }
 
+    /**
+     * 打开数据库
+     */
     public void  openDb(){
         try {
             rocksDB = RocksDB.open(BD_FILE);
@@ -45,10 +52,18 @@ public class RocksDbUtils {
         }
     }
 
+    /**
+     * 关闭数据库
+     */
     public void close(){
         rocksDB.close();
     }
 
+    /**
+     * 存储数据
+     * @param key
+     * @param stringSet
+     */
     public void  put(String key, Set<String> stringSet) {
         byte[] keyB = SerializerUtil.serialize(key);
         byte[] value = SerializerUtil.serialize(stringSet);
@@ -59,6 +74,22 @@ public class RocksDbUtils {
         }
     }
 
+    /**
+     * 存储数据
+     * @param date 交易日期
+     * @param dbName 按外部对账单和内部对账单不同存储
+     * @param mold 取订单支付的小时为mold 将订单数据尽量均匀的拆分成小集合
+     * @param stringSet 订单数据集合
+     */
+    public void  put(String date,String dbName,String mold,Set<String> stringSet){
+        put(date + dbName + mold,stringSet);
+    }
+
+    /**
+     * 获取数据
+     * @param key
+     * @return
+     */
     public Set<String> get(String key){
         byte[] keyb = SerializerUtil.serialize(key);
         Set<String> set = null;
@@ -69,6 +100,19 @@ public class RocksDbUtils {
             e.printStackTrace();
         }
         return set;
+    }
+
+    /**
+     * 删除数据
+     * @param key
+     */
+    public void delete(String key){
+        byte[] keyb = SerializerUtil.serialize(key);
+        try {
+            rocksDB.delete(keyb);
+        } catch (RocksDBException e) {
+            e.printStackTrace();
+        }
     }
 
 }

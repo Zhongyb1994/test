@@ -21,13 +21,26 @@ public class RocksDbTest {
     @Test
     public void  test(){
         RocksDbUtils db = RocksDbUtils.getInstance();
-        HashSet<String> set = Sets.newHashSet();
-        set.add("rose");
-        set.add("jack");
-        db.put("name",set);
+//        HashSet<String> set = Sets.newHashSet();
+//        set.add("rose");
+//        set.add("jack");
+//        db.put("name",set);
+//
+//
+//        HashSet<String> set1 = Sets.newHashSet();
+//        set1.add("lucy");
+//        set1.add("lili");
+//
+//        db.put("name",set1);
 
-        Set<String> set1 = db.get("name");
-        System.out.println(set1);
+        Set<String> set2 = db.get("name");
+        System.out.println(set2);
+    }
 
+    @Test
+    public void test2(){
+        String s = "201909011733012980050295222FS";
+        String mold = String.valueOf(s.charAt(22));
+        System.out.println(mold);
     }
 }

@@ -4,10 +4,12 @@
  */
 package com.yutain.controller;
 
+import com.yutian.service.CheckOrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -21,9 +23,13 @@ public class TestController {
 
     private static final Logger logger = LoggerFactory.getLogger(TestController.class);
 
+    @Autowired
+    private CheckOrderService checkOrderService;
+
     @RequestMapping("/demo")
-    public String demo(){
+    public String demo(@RequestParam(value = "payDay")String payday){
         logger.info("demo >> 测试工程环境");
+        checkOrderService.checkOrder(payday);
         return "success";
     }
 

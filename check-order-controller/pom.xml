@@ -30,6 +30,11 @@
         </dependency>
         <dependency>
             <groupId>com.yutian</groupId>
+            <artifactId>check-oeder-service</artifactId>
+            <version>1.0.0.20190908</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutian</groupId>
             <artifactId>check-oeder-common</artifactId>
             <version>1.0.0.20190908</version>
         </dependency>
