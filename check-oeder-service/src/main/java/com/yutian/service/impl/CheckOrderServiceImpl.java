@@ -43,15 +43,15 @@ public class CheckOrderServiceImpl implements CheckOrderService {
     @Override
     public boolean checkOrder(String payDay) {
         try {
-            Map<String, Set<String>> setMap = new HashMap<>();
+            Map<String, Set<String>> innerMap = new HashMap<>();
             long start = System.currentTimeMillis();
             logger.info("加载内部数据开始");
-            loadInnerData(payDay, OrderTypeEnum.INNER.getValue(),setMap);
+            loadInnerData(payDay, OrderTypeEnum.INNER.getValue(),innerMap);
             long end = System.currentTimeMillis();
             logger.info("加载内部数据完成,usetime = {}秒",(end - start) / 1000);
             int num = 0;
-            for (String s : setMap.keySet()) {
-                Set<String> set = setMap.get(s);
+            for (String s : innerMap.keySet()) {
+                Set<String> set = innerMap.get(s);
                 num += set.size();
             }
             logger.info("内部数据总量 num = {}",num);
@@ -64,9 +64,17 @@ public class CheckOrderServiceImpl implements CheckOrderService {
 
     private void loadInnerData(String payDay,Integer orderType,Map<String, Set<String>> setMap) throws InterruptedException {
         // 1.解压文件
-        String srcPath = "/Users/wengyuzhu/Desktop/check-order/WX_bank1_20190912030008.zip";
-        String dePath = "/Users/wengyuzhu/Desktop/check-order/" + payDay + "/Wx";
-        File filePath = ZipUtil.unzip(srcPath, dePath);
+        File filePath;
+        if (orderType == OrderTypeEnum.INNER.getValue()){
+            String srcPath = "/Users/wengyuzhu/Desktop/check-order/WX_bank1_20190912030008.zip";
+            String dePath = "/Users/wengyuzhu/Desktop/check-order/" + payDay + "/inner";
+            filePath = ZipUtil.unzip(srcPath, dePath);
+        }else {
+            String srcPath = "/Users/wengyuzhu/Desktop/check-order/ylwx_trade_20190911.csv.zip";
+            String dePath = "/Users/wengyuzhu/Desktop/check-order/" + payDay + "/out";
+            filePath = ZipUtil.unzip(srcPath, dePath);
+        }
+
         File[] files = filePath.listFiles();
         if(null == files || files.length == 0){
             throw new RuntimeException("账单数据为空");
