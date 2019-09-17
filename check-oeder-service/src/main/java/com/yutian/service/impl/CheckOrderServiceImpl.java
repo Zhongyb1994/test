@@ -46,7 +46,7 @@ public class CheckOrderServiceImpl implements CheckOrderService {
             Map<String, Set<String>> innerMap = new HashMap<>();
             long start = System.currentTimeMillis();
             logger.info("加载内部数据开始");
-            loadInnerData(payDay, OrderTypeEnum.INNER.getValue(),innerMap);
+            loadInnerData(payDay, OrderTypeEnum.OUT.getValue(),innerMap);
             long end = System.currentTimeMillis();
             logger.info("加载内部数据完成,usetime = {}秒",(end - start) / 1000);
             int num = 0;
@@ -87,7 +87,7 @@ public class CheckOrderServiceImpl implements CheckOrderService {
             if (file.getName().contains("gather")){
                 continue;
             }
-            LoadDataThread thread = new LoadDataThread(latch, Constant.INNER_DB_NAME,file,payDay,setMap);
+            LoadDataThread thread = new LoadDataThread(latch, Constant.OUT_DB_NAME,file,payDay,setMap);
             executorService.execute(thread);
         }
         if (!latch.await(30, TimeUnit.MINUTES)){

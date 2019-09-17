@@ -8,6 +8,8 @@ import cn.hutool.core.text.csv.CsvData;
 import cn.hutool.core.text.csv.CsvRow;
 import cn.hutool.core.text.csv.CsvUtil;
 import com.yutian.common.constant.Constant;
+import com.yutian.common.enums.OrderTypeEnum;
+import com.yutian.common.enums.TradeTypeEnum;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,10 +69,10 @@ public class LoadDataThread extends Thread {
     public void run() {
         // 内部对账单和外部对账单格式可能不一样 所以要分开加载
         if (dbName.equals(Constant.INNER_DB_NAME)) {
-            loadData(Constant.INNER_COLUMN_NO);
+            loadData(Constant.INNER_COLUMN_NO, OrderTypeEnum.INNER.getValue());
         }
         if (dbName.equals(Constant.OUT_DB_NAME)) {
-            loadData(Constant.OUT_COLUMN_NO);
+            loadData(Constant.OUT_COLUMN_NO,OrderTypeEnum.OUT.getValue());
         }
     }
 
@@ -79,7 +81,7 @@ public class LoadDataThread extends Thread {
      *
      * @param columns 所需加载元数据的指定列集合
      */
-    private void loadData(int[] columns) {
+    private void loadData(int[] columns,int type) {
         try {
             CsvData read = CsvUtil.getReader().read(file, Charset.forName("UTF-8"));
             List<CsvRow> rows = read.getRows();
@@ -96,9 +98,14 @@ public class LoadDataThread extends Thread {
                 String mold = getMold(orderNo);
                 Set<String> set = getSet(mold);
                 // 一条账单数据 订单号|交易金额|平台方手续费|交易类型
+                if (type == OrderTypeEnum.INNER.getValue()){
+                    set.add(rawList.get(columns[0]) + "|"
+                            + rawList.get(columns[1]) +"|" + rawList.get(columns[2]) + "|" + getTradeType(Integer.valueOf(rawList.get(columns[3]))));
+                }else {
+                    set.add(rawList.get(columns[0]) + "|"
+                            + rawList.get(columns[1]) +"|" + rawList.get(columns[2]) + "|" + rawList.get(columns[3]));
+                }
 
-                set.add(rawList.get(columns[0]) + "|"
-                + rawList.get(columns[1]) +"|" + rawList.get(columns[2]) + "|" + rawList.get(columns[3]));
             }
         } catch (Exception e) {
             logger.error("数据加载异常 payday = {},dbName = {},errorInfo = {}",payDay,dbName, ExceptionUtils.getStackTrace(e));
@@ -106,6 +113,14 @@ public class LoadDataThread extends Thread {
             latch.countDown();
         }
 
+    }
+
+    private String getTradeType(int value){
+        if (value == TradeTypeEnum.TRADE.getValue()){
+            return TradeTypeEnum.TRADE.getName();
+        }
+
+        return TradeTypeEnum.REFUND.getName();
     }
 
 
