@@ -5,25 +5,29 @@
 package com.yutian.service.impl;
 
 import cn.hutool.core.util.ZipUtil;
+import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Sets;
 import com.yutian.common.constant.Constant;
 import com.yutian.common.enums.OrderTypeEnum;
 import com.yutian.common.thread.LoadDataThread;
+import com.yutian.common.util.RocksDbUtils;
+import com.yutian.common.util.SetUtils;
 import com.yutian.common.util.ThreadPoolFactory;
 import com.yutian.service.CheckOrderService;
 import net.bytebuddy.implementation.bytecode.Throw;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -43,18 +47,40 @@ public class CheckOrderServiceImpl implements CheckOrderService {
     @Override
     public boolean checkOrder(String payDay) {
         try {
-            Map<String, Set<String>> innerMap = new HashMap<>();
             long start = System.currentTimeMillis();
             logger.info("加载内部数据开始");
-            loadInnerData(payDay, OrderTypeEnum.OUT.getValue(),innerMap);
+            List<String> innerMolds = loadInnerData(payDay, OrderTypeEnum.INNER.getValue());
             long end = System.currentTimeMillis();
             logger.info("加载内部数据完成,usetime = {}秒",(end - start) / 1000);
-            int num = 0;
-            for (String s : innerMap.keySet()) {
-                Set<String> set = innerMap.get(s);
-                num += set.size();
+
+            start = System.currentTimeMillis();
+            logger.info("加载外部部数据开始");
+            List<String> outMolds =  loadInnerData(payDay, OrderTypeEnum.OUT.getValue());
+            end = System.currentTimeMillis();
+            logger.info("加载外部数据完成,usetime = {}秒",(end - start) / 1000);
+
+            // 按膜取出数据集合
+            Set<String> innerDatas = new HashSet<>(10000);
+            Set<String> outDatas = new HashSet<>(10000);
+
+            // 差异数据集合
+            Set<String> innerDiffer = new HashSet<>();
+            Set<String> outDiffer = new HashSet<>();
+            int innerNum = 0;
+            int outNum = 0;
+
+            for (int i = 0; i < innerMolds.size(); i++) {
+                innerDatas = RocksDbUtils.getInstance().get(innerMolds.get(i));
+                innerNum += innerDatas.size();
+                outDatas = RocksDbUtils.getInstance().get(outMolds.get(i));
+                outNum += outDatas.size();
+                innerDiffer.addAll(Sets.difference(innerDatas,outDatas));
+                outDiffer.addAll(Sets.difference(outDatas,innerDatas));
             }
-            logger.info("内部数据总量 num = {}",num);
+            logger.info("订单数目核对，内部订单数 innerNum = {} 外部订单数目 outNum = {}",innerNum,outNum);
+            logger.info("对账完成 >> 内部订单不存在，外部存在的订单数据 num = {} innerNoExist = {}", innerDiffer.size(),JSON.toJSON(innerDiffer));
+            logger.info("对账完成 >> 外部订单不存在，内部存在的订单数据 num = {} outNoExist = {}", outDiffer.size(),JSON.toJSON(outDiffer));
+
         }catch (Exception e){
             logger.error("对账出现异常 >> error = {}", ExceptionUtils.getStackTrace(e));
         }
@@ -62,17 +88,24 @@ public class CheckOrderServiceImpl implements CheckOrderService {
         return false;
     }
 
-    private void loadInnerData(String payDay,Integer orderType,Map<String, Set<String>> setMap) throws InterruptedException {
+    private List<String> loadInnerData(String payDay,Integer orderType) throws InterruptedException {
+        Map<String, Set<String>> setMap = new HashMap<>();
         // 1.解压文件
         File filePath;
+        int noUseFile;
+        String dbName = null;
         if (orderType == OrderTypeEnum.INNER.getValue()){
             String srcPath = "/Users/wengyuzhu/Desktop/check-order/WX_bank1_20190912030008.zip";
             String dePath = "/Users/wengyuzhu/Desktop/check-order/" + payDay + "/inner";
             filePath = ZipUtil.unzip(srcPath, dePath);
+            noUseFile = 1;
+            dbName = Constant.INNER_DB_NAME;
         }else {
             String srcPath = "/Users/wengyuzhu/Desktop/check-order/ylwx_trade_20190911.csv.zip";
             String dePath = "/Users/wengyuzhu/Desktop/check-order/" + payDay + "/out";
             filePath = ZipUtil.unzip(srcPath, dePath);
+            noUseFile = 0;
+            dbName = Constant.OUT_DB_NAME;
         }
 
         File[] files = filePath.listFiles();
@@ -82,12 +115,12 @@ public class CheckOrderServiceImpl implements CheckOrderService {
         logger.info("数据加载开始 >> fileSize = {}",files.length);
         // 2.多线程加载数据
         ExecutorService executorService = ThreadPoolFactory.getExecutorService();
-        CountDownLatch latch = new CountDownLatch(files.length - 1);
+        CountDownLatch latch = new CountDownLatch(files.length - noUseFile);
         for (File file : files) {
             if (file.getName().contains("gather")){
                 continue;
             }
-            LoadDataThread thread = new LoadDataThread(latch, Constant.OUT_DB_NAME,file,payDay,setMap);
+            LoadDataThread thread = new LoadDataThread(latch, dbName,file,payDay,setMap);
             executorService.execute(thread);
         }
         if (!latch.await(30, TimeUnit.MINUTES)){
@@ -95,5 +128,12 @@ public class CheckOrderServiceImpl implements CheckOrderService {
         }
         logger.info("数据加载完成 >> moldnum = {}",setMap.size());
 
+        // 3.数据写入rocksdb
+        setMap.forEach((k,v) ->{
+            RocksDbUtils.getInstance().put(k,v);
+        });
+        List<String> collect = setMap.keySet().stream().sorted().collect(Collectors.toList());
+        setMap.clear();
+        return collect;
     }
 }

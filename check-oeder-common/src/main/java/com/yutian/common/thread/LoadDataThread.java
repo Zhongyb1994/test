@@ -10,6 +10,7 @@ import cn.hutool.core.text.csv.CsvUtil;
 import com.yutian.common.constant.Constant;
 import com.yutian.common.enums.OrderTypeEnum;
 import com.yutian.common.enums.TradeTypeEnum;
+import com.yutian.common.util.CSVUtil;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,27 +84,23 @@ public class LoadDataThread extends Thread {
      */
     private void loadData(int[] columns,int type) {
         try {
-            CsvData read = CsvUtil.getReader().read(file, Charset.forName("UTF-8"));
-            List<CsvRow> rows = read.getRows();
-            CsvRow row;
-            String data = null;
-            StringBuffer sb = new StringBuffer();
+            String[] row;
+            List<String[]> rows = CSVUtil.parseCsvFile(file.getPath());
             for (int i = 0; i < rows.size(); i++) {
-                if (i == 0) {
-                    continue;
-                }
                 row = rows.get(i);
-                List<String> rawList = row.getRawList();
-                String orderNo = rawList.get(columns[0]);
+                String orderNo = row[columns[0]];
                 String mold = getMold(orderNo);
                 Set<String> set = getSet(mold);
                 // 一条账单数据 订单号|交易金额|平台方手续费|交易类型
                 if (type == OrderTypeEnum.INNER.getValue()){
-                    set.add(rawList.get(columns[0]) + "|"
-                            + rawList.get(columns[1]) +"|" + rawList.get(columns[2]) + "|" + getTradeType(Integer.valueOf(rawList.get(columns[3]))));
+                    set.add(row[columns[0]] + "|"
+                            + row[columns[1]] +"|" + row[columns[2]] + "|" + getTradeType(Integer.valueOf(row[columns[3]])));
                 }else {
-                    set.add(rawList.get(columns[0]) + "|"
-                            + rawList.get(columns[1]) +"|" + rawList.get(columns[2]) + "|" + rawList.get(columns[3]));
+                    if (i == 1){
+                        logger.info("外部数据 订单号 ordersn = {}",row[columns[0]]);
+                    }
+                    set.add(row[columns[0]] + "|"
+                            + row[columns[1]] +"|" + row[columns[2]] + "|" + row[columns[3]]);
                 }
 
             }
@@ -145,8 +142,10 @@ public class LoadDataThread extends Thread {
     private Set<String> getSet(String mold) {
         Set<String> set = setMap.get(mold);
         if (null == set) {
-            set = new HashSet<String>();
-            setMap.put(mold, set);
+            synchronized (LoadDataThread.class){
+                set = new HashSet<String>();
+                setMap.put(mold, set);
+            }
         }
         return set;
     }
