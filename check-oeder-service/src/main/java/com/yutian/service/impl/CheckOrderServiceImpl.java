@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -47,6 +48,8 @@ public class CheckOrderServiceImpl implements CheckOrderService {
     @Override
     public boolean checkOrder(String payDay) {
         try {
+            long ss = System.currentTimeMillis();
+            logger.info("对账开始 >> payday = {}",payDay);
             long start = System.currentTimeMillis();
             logger.info("加载内部数据开始");
             List<String> innerMolds = loadInnerData(payDay, OrderTypeEnum.INNER.getValue());
@@ -68,18 +71,48 @@ public class CheckOrderServiceImpl implements CheckOrderService {
             Set<String> outDiffer = new HashSet<>();
             int innerNum = 0;
             int outNum = 0;
-
+            start = System.currentTimeMillis();
+            logger.info("对账开始 >> ");
             for (int i = 0; i < innerMolds.size(); i++) {
                 innerDatas = RocksDbUtils.getInstance().get(innerMolds.get(i));
                 innerNum += innerDatas.size();
                 outDatas = RocksDbUtils.getInstance().get(outMolds.get(i));
                 outNum += outDatas.size();
+                // 外部比内部少的订单
                 innerDiffer.addAll(Sets.difference(innerDatas,outDatas));
+                // 内部比外部少的订单
                 outDiffer.addAll(Sets.difference(outDatas,innerDatas));
             }
+            end = System.currentTimeMillis();
+            logger.info("对账完成,usetime = {}秒",(end - start) / 1000);
             logger.info("订单数目核对，内部订单数 innerNum = {} 外部订单数目 outNum = {}",innerNum,outNum);
-            logger.info("对账完成 >> 内部订单不存在，外部存在的订单数据 num = {} innerNoExist = {}", innerDiffer.size(),JSON.toJSON(innerDiffer));
-            logger.info("对账完成 >> 外部订单不存在，内部存在的订单数据 num = {} outNoExist = {}", outDiffer.size(),JSON.toJSON(outDiffer));
+            logger.info("对账完成 >> 内部订单存在，外部不存在的订单数据 num = {} innerNoExist = {}", innerDiffer.size(),JSON.toJSON(innerDiffer));
+            logger.info("对账完成 >> 外部订单存在，内部不存在的订单数据 num = {} outNoExist = {}", outDiffer.size(),JSON.toJSON(outDiffer));
+            
+            //外部订单撤销 会有正反交易
+//            outDiffer.stream().filter(r -> !r.contains("REVOKED")).filter();
+//            outDiffer.stream().filter(s -> )
+
+            String cancleTrade = "";
+            Iterator<String> iterator = outDiffer.iterator();
+            while (iterator.hasNext()){
+                String next = iterator.next();
+                if (next.contains("REVOKED")){
+                    cancleTrade = next.split("REVOKED")[0];
+                    iterator.remove();
+                    continue;
+                }
+                if (next.contains(cancleTrade)){
+                    iterator.remove();
+                }
+            }
+
+            logger.info("对账完成 >> 内部订单存在，外部不存在的订单数据 num = {} innerNoExist = {}", innerDiffer.size(),JSON.toJSON(innerDiffer));
+            logger.info("对账完成 >> 外部订单存在，内部不存在的订单数据 num = {} outNoExist = {}", outDiffer.size(),JSON.toJSON(outDiffer));
+
+
+            //比较内部差异集合和外部差异集合是否存在一样的订单 即双方都存在此订单 但此订单的手续费不一致
+
 
         }catch (Exception e){
             logger.error("对账出现异常 >> error = {}", ExceptionUtils.getStackTrace(e));

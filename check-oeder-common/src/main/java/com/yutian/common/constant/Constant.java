@@ -17,7 +17,9 @@ public class Constant {
 
     public static String INNER_DB_NAME = "IN";
 
-    public static int [] INNER_COLUMN_NO = {0,10,12,20};
+    public static int [] INNER_COLUMN_NO = {0,10,12,20,3};
 
-    public static int [] OUT_COLUMN_NO = {6,12,22,9};
+    public static int [] OUT_COLUMN_NO = {6,12,22,9,16,15};
+
+    public static String REFUND = "refund";
 }

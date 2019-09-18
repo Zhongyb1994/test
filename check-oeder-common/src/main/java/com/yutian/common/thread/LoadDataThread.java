@@ -93,14 +93,32 @@ public class LoadDataThread extends Thread {
                 Set<String> set = getSet(mold);
                 // 一条账单数据 订单号|交易金额|平台方手续费|交易类型
                 if (type == OrderTypeEnum.INNER.getValue()){
-                    set.add(row[columns[0]] + "|"
-                            + row[columns[1]] +"|" + row[columns[2]] + "|" + getTradeType(Integer.valueOf(row[columns[3]])));
-                }else {
-                    if (i == 1){
-                        logger.info("外部数据 订单号 ordersn = {}",row[columns[0]]);
+                    // 内部账单 订单状态需要处理 退款数据加上退款单号
+                    if (file.getName().contains(Constant.REFUND)){
+                        // 退款
+                        set.add(row[columns[0]] + "|"
+                                + row[columns[1]] +"|" + row[columns[2]] + "|" + TradeTypeEnum.REFUND.getName() + "|" +row[columns[4]]);
+                    }else {
+                        // 交易
+                        set.add(row[columns[0]] + "|"
+                                + row[columns[1]] +"|" + row[columns[2]] + "|" + TradeTypeEnum.TRADE.getName());
                     }
-                    set.add(row[columns[0]] + "|"
-                            + row[columns[1]] +"|" + row[columns[2]] + "|" + row[columns[3]]);
+
+                }else {
+                    // 外部账单 退款手续费为负 及退款金额处理
+                    String merchantFee = row[columns[2]];
+                    int index = columns[1];
+                    if (merchantFee.startsWith("-") || row[columns[3]].equals(TradeTypeEnum.REFUND.getName())){
+                        // 退款
+                        merchantFee = merchantFee.replace("-","");
+                        index = columns[4];
+                        set.add(row[columns[0]] + "|"
+                                + row[index] +"|" + merchantFee + "|" + row[columns[3]] + "|" + row[columns[5]]);
+                    }else {
+                        // 交易
+                        set.add(row[columns[0]] + "|"
+                                + row[index] +"|" + merchantFee + "|" + row[columns[3]]);
+                    }
                 }
 
             }
@@ -112,12 +130,13 @@ public class LoadDataThread extends Thread {
 
     }
 
-    private String getTradeType(int value){
-        if (value == TradeTypeEnum.TRADE.getValue()){
-            return TradeTypeEnum.TRADE.getName();
+    private String getTradeType(String fileName){
+
+        if (fileName.contains("refund")){
+            return TradeTypeEnum.REFUND.getName();
         }
 
-        return TradeTypeEnum.REFUND.getName();
+        return TradeTypeEnum.TRADE.getName();
     }
 
 
