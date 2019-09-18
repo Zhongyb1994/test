@@ -20,13 +20,13 @@ import java.util.Set;
  */
 public class CheckServiceTest {
 
-    private CheckOrderServiceImpl checkOrderService = new CheckOrderServiceImpl();
+//    private CheckOrderServiceImpl checkOrderService = new CheckOrderServiceImpl();
 
 
-    @Test
-    public void  test(){
-        checkOrderService.checkOrder("20190911");
-    }
+//    @Test
+//    public void  test(){
+//        checkOrderService.checkOrder("20190911");
+//    }
 
     @Test
     public void test1(){
@@ -46,5 +46,20 @@ public class CheckServiceTest {
         System.out.println(difference);
         System.out.println(difference1);
 
+    }
+
+    @Test
+    public void test2(){
+        String s = "2019091123531201154012774290N|63.00|0.13|SUCCESS";
+        String substring = s.substring(0, 35);
+        System.out.println(substring);
+    }
+
+    @Test
+    public void test3(){
+        ArrayList<String> list = new ArrayList<>();
+        for (String s : list) {
+            System.out.println(s);
+        }
     }
 }

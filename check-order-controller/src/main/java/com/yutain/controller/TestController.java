@@ -28,7 +28,6 @@ public class TestController {
 
     @RequestMapping("/demo")
     public String demo(@RequestParam(value = "payDay")String payday){
-        logger.info("demo >> 测试工程环境");
         checkOrderService.checkOrder(payday);
         return "success";
     }
