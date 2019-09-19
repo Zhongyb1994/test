@@ -16,10 +16,10 @@ import java.util.concurrent.ExecutorService;
  */
 public class ThreadFactoryTest {
 
-    @Test
-    public void  test1(){
-        ExecutorService pool = ThreadPoolFactory.getExecutorService();
-        pool.submit(new ThreadDemo());
-        pool.submit(new ThreadDemo());
-    }
+//    @Test
+//    public void  test1(){
+//        ExecutorService pool = ThreadPoolFactory.getExecutorService();
+//        pool.submit(new ThreadDemo());
+//        pool.submit(new ThreadDemo());
+//    }
 }

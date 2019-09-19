@@ -21,18 +21,18 @@ import java.util.List;
 public class CSvUtilTest {
 
 
-    @Test
-    public void  test1(){
-        String fileName = "/Users/wengyuzhu/Desktop/WX_bank1_20190912030008的副本/WX_bank1_20190912030008_refund.csv";
-        CsvData read = CsvUtil.getReader().read(new File(fileName), Charset.forName("GBK"));
-        List<CsvRow> rows = read.getRows();
-        for (int i = 0; i < 10; i++) {
-            CsvRow row = rows.get(i);
-            List<String> rawList = row.getRawList();
-            String orderSn = rawList.get(0);
-            System.out.println(orderSn);
-        }
-    }
+//    @Test
+//    public void  test1(){
+//        String fileName = "/Users/wengyuzhu/Desktop/WX_bank1_20190912030008的副本/WX_bank1_20190912030008_refund.csv";
+//        CsvData read = CsvUtil.getReader().read(new File(fileName), Charset.forName("GBK"));
+//        List<CsvRow> rows = read.getRows();
+//        for (int i = 0; i < 10; i++) {
+//            CsvRow row = rows.get(i);
+//            List<String> rawList = row.getRawList();
+//            String orderSn = rawList.get(0);
+//            System.out.println(orderSn);
+//        }
+//    }
 
 
     @Test

@@ -13,8 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScans;
 
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class})
+@SpringBootApplication()
 @ComponentScans({
         @ComponentScan("com.yutian.common"),
         @ComponentScan("com.yutian.controller"),

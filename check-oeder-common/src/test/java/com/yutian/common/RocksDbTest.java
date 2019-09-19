@@ -18,9 +18,9 @@ import java.util.Set;
  */
 public class RocksDbTest {
 
-    @Test
-    public void  test(){
-        RocksDbUtils db = RocksDbUtils.getInstance();
+//    @Test
+//    public void  test(){
+//        RocksDbUtils db = RocksDbUtils.getInstance();
 //        HashSet<String> set = Sets.newHashSet();
 //        set.add("rose");
 //        set.add("jack");
@@ -32,10 +32,10 @@ public class RocksDbTest {
 //        set1.add("lili");
 //
 //        db.put("name",set1);
-
-        Set<String> set2 = db.get("name");
-        System.out.println(set2);
-    }
+//
+//        Set<String> set2 = db.get("name");
+//        System.out.println(set2);
+//    }
 
     @Test
     public void test2(){
