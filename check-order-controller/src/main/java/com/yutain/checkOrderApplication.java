@@ -24,7 +24,7 @@ public class checkOrderApplication {
 
     public static void main(String[] args) {
         // 为本地环境启动 acm 代理
-        acmProxy();
+//        acmProxy();
         SpringApplication.run(checkOrderApplication.class, args);
     }
 

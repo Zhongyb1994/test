@@ -4,19 +4,15 @@
  */
 package com.yutian.common.thread;
 
-import cn.hutool.core.text.csv.CsvData;
-import cn.hutool.core.text.csv.CsvRow;
-import cn.hutool.core.text.csv.CsvUtil;
 import com.yutian.common.constant.Constant;
 import com.yutian.common.enums.OrderTypeEnum;
 import com.yutian.common.enums.TradeTypeEnum;
 import com.yutian.common.util.CSVUtil;
+import com.yutian.common.util.StringPool;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +28,6 @@ import java.util.concurrent.CountDownLatch;
 public class LoadDataThread extends Thread {
 
     private static Logger logger = LoggerFactory.getLogger(LoadDataThread.class);
-
     /**
      * 线程计数器
      */
@@ -96,12 +91,12 @@ public class LoadDataThread extends Thread {
                     // 内部账单 订单状态需要处理 退款数据加上退款单号
                     if (file.getName().contains(Constant.REFUND)){
                         // 退款
-                        set.add(row[columns[0]] + "|"
-                                + row[columns[1]] +"|" + row[columns[2]] + "|" + TradeTypeEnum.REFUND.getName() + "|" +row[columns[4]]);
+                        set.add(row[columns[0]] + StringPool.SPLIT
+                                + row[columns[1]] + StringPool.SPLIT + row[columns[2]] + StringPool.SPLIT + TradeTypeEnum.REFUND.getName() + StringPool.SPLIT +row[columns[4]]);
                     }else {
                         // 交易
-                        set.add(row[columns[0]] + "|"
-                                + row[columns[1]] +"|" + row[columns[2]] + "|" + TradeTypeEnum.TRADE.getName());
+                        set.add(row[columns[0]] + StringPool.SPLIT
+                                + row[columns[1]] +StringPool.SPLIT + row[columns[2]] + StringPool.SPLIT + TradeTypeEnum.TRADE.getName());
                     }
 
                 }else {
@@ -112,12 +107,12 @@ public class LoadDataThread extends Thread {
                         // 退款
                         merchantFee = merchantFee.replace("-","");
                         index = columns[4];
-                        set.add(row[columns[0]] + "|"
-                                + row[index] +"|" + merchantFee + "|" + row[columns[3]] + "|" + row[columns[5]]);
+                        set.add(row[columns[0]] + StringPool.SPLIT
+                                + row[index] +StringPool.SPLIT + merchantFee + StringPool.SPLIT + row[columns[3]] + StringPool.SPLIT + row[columns[5]]);
                     }else {
                         // 交易
-                        set.add(row[columns[0]] + "|"
-                                + row[index] +"|" + merchantFee + "|" + row[columns[3]]);
+                        set.add(row[columns[0]] + StringPool.SPLIT
+                                + row[index] +StringPool.SPLIT + merchantFee + StringPool.SPLIT + row[columns[3]]);
                     }
                 }
 
